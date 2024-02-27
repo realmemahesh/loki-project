@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-fs
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: minio-fs
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: minio-fs
+    spec:
+      volumes:
+      - name: mnt
+        persistentVolumeClaim:
+          claimName: minio-pvc
+      containers:
+      - name: minio-fs
+        volumeMounts:
+        - name: mnt 
+          mountPath: "/data"
+        image: minio/minio:latest
+        args:
+        - server
+        - /data
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: "minio"
+        - name: MINIO_SECRET_KEY
+          value: "minio123"
+        ports:
+        - containerPort: 9000
+          hostPort: 9000
